@@ -16,20 +16,27 @@ CURRENT = os.path.dirname(__file__)
 class SlideShareDownloader:
     """SlideShare Downloader Class"""
 
-    def __init__(self, slideshare_url=None, download_format='pptx'):
+    def __init__(self, slideshare_url=None, download_format='pdf'):
         self.download_format = download_format
         self.slideshare_url = slideshare_url
 
     def get_slide_info(self):
         html = requests.get(self.slideshare_url).content
         soup = BeautifulSoup(html, 'lxml')
-        title = soup.find(class_='j-title-breadcrumb').get_text().strip()
-        image_url = soup.find(class_='slide-image')['srcset']
-        final_img_url = image_url.split(',')[2].replace(
+        title = soup.find(class_='Heading_heading__LwpOS Heading_h1__J9yQZ Title_root__LXcGO').get_text().strip()
+        image_url = soup.find(class_='SlideImage_img__0DmDo')['srcset']
+        print(len(image_url.split(',')))
+        if(len(image_url.split(','))==3 ):
+            final_img_url = image_url.split(',')[2].replace(
             ' ', '').replace('1024w', '')
-        total_slides = soup.find(id='total-slides').get_text().strip()
+        elif (len(image_url.split(','))==2 ):
+            final_img_url = image_url.split(',')[1].split(' ')[1]
+        else:
+            final_img_url = image_url.split(',')[0].replace(
+            ' ', '').replace('320w', '')
+        total_slides = soup.find(class_='total-slides j-total-slides').get_text().strip()
         metadata = soup.find_all(class_='metadata-item')
-        category = soup.find(class_='slideshow-category').get_text().strip()
+        category = soup.find(class_='CategoryChips_root__6o2nr').get_text().strip()
         date, views = None, None
         if len(metadata) >= 2:
             date, views = metadata[0].get_text(
@@ -54,13 +61,13 @@ class SlideShareDownloader:
         soup = BeautifulSoup(html, 'lxml')
         # soup.title.string
         title = '/tmp'
-        images = soup.findAll('img', {'class': 'slide-image'})
+        images = soup.findAll('img', {'class': 'SlideImage_img__0DmDo'})
         i = 0
         for image in images:
             image_url = image.get('srcset')
             print(image_url)
-            final_img_url = image_url.split(',')[2].replace(
-                ' ', '').replace('1024w', '')
+            length = len(image_url.split(','))
+            final_img_url = image_url.split(',')[length-1].split(' ')[1]
             img = requests.get(final_img_url, verify=False)
             if not os.path.exists(title):
                 os.makedirs(title)
