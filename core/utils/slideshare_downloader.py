@@ -16,7 +16,7 @@ CURRENT = os.path.dirname(__file__)
 class SlideShareDownloader:
     """SlideShare Downloader Class"""
 
-    def __init__(self, slideshare_url=None, download_format='pdf'):
+    def __init__(self, slideshare_url=None, download_format='pptx'):
         self.download_format = download_format
         self.slideshare_url = slideshare_url
 
