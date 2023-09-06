@@ -28,11 +28,22 @@ def start_slide_preparation(msg, url):
     status.update({f"slide_{msg}": "Download-Ready"})
 
 
+# @app.post('/slideshare-downloader/slides/download')
+# def download_slides():
+#     try:
+#         if file_data.get("slide_status") == "Done":
+#             return send_file(file_data.get('slide_bfr'), as_attachment=True, attachment_filename=file_data.get('slide_fname'))
+#     except Exception:
+#         flash('Something went wrong while downloading', 'error')
+#         return redirect(url_for('slide_downloader'))
+
 @app.post('/slideshare-downloader/slides/download')
 def download_slides():
     try:
         if file_data.get("slide_status") == "Done":
+            print(f"Debug: slide_fname = {file_data.get('slide_fname')}")  # Debugging line
             return send_file(file_data.get('slide_bfr'), as_attachment=True, attachment_filename=file_data.get('slide_fname'))
-    except Exception:
+    except Exception as e:
+        print(f"Error: {e}")  # Debugging line
         flash('Something went wrong while downloading', 'error')
         return redirect(url_for('slide_downloader'))
