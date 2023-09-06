@@ -37,7 +37,7 @@ class SlideShareDownloader:
         total_slides = soup.find(class_='total-slides j-total-slides').get_text().strip()
         metadata = soup.find_all(class_='metadata-item')
         category = soup.find(class_='CategoryChips_root__6o2nr').get_text().strip()
-        date, views = None, None
+        date, views = soup.find(class_='Text_root__Qdprv Text_secondary__SDKFB Text_medium__XbUIY').get_text().strip(), soup.find(class_='Text_root__Qdprv Text_secondary__SDKFB Text_weight-strong__Cygpu Text_medium__XbUIY Likes_root__8tyVB').get_text().strip()
         if len(metadata) >= 2:
             date, views = metadata[0].get_text(
             ).strip(), metadata[2].get_text().strip()
