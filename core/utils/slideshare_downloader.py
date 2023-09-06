@@ -1,3 +1,5 @@
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s]: %(message)s')
 from io import BytesIO
 import os
 import img2pdf
@@ -19,30 +21,37 @@ class SlideShareDownloader:
     def __init__(self, slideshare_url=None, download_format='pdf'):
         self.download_format = download_format
         self.slideshare_url = slideshare_url
+        logging.info(f'Initialized with URL: {slideshare_url}, Format: {download_format}')
 
     def get_slide_info(self):
-        html = requests.get(self.slideshare_url).content
-        soup = BeautifulSoup(html, 'lxml')
-        title = soup.find(class_='Heading_heading__LwpOS Heading_h1__J9yQZ Title_root__LXcGO').get_text().strip()
-        image_url = soup.find(class_='SlideImage_img__0DmDo')['srcset']
-        print(len(image_url.split(',')))
-        if(len(image_url.split(','))==3 ):
-            final_img_url = image_url.split(',')[2].replace(
-            ' ', '').replace('1024w', '')
-        elif (len(image_url.split(','))==2 ):
-            final_img_url = image_url.split(',')[1].split(' ')[1]
-        else:
-            final_img_url = image_url.split(',')[0].replace(
-            ' ', '').replace('320w', '')
-        total_slides = soup.find(class_='total-slides j-total-slides').get_text().strip()
-        metadata = soup.find_all(class_='metadata-item')
-        category = soup.find(class_='CategoryChips_root__6o2nr').get_text().strip()
-        date, views = soup.find(class_='Text_root__Qdprv Text_secondary__SDKFB Text_medium__XbUIY').get_text().strip(), soup.find(class_='Text_root__Qdprv Text_secondary__SDKFB Text_weight-strong__Cygpu Text_medium__XbUIY Likes_root__8tyVB').get_text().strip()
-        if len(metadata) >= 2:
-            date, views = metadata[0].get_text(
-            ).strip(), metadata[2].get_text().strip()
+        try:
+            html = requests.get(self.slideshare_url).content
+            soup = BeautifulSoup(html, 'lxml')
+            title = soup.find(class_='Heading_heading__LwpOS Heading_h1__J9yQZ Title_root__LXcGO').get_text().strip()
+            image_url = soup.find(class_='SlideImage_img__0DmDo')['srcset']
+            print(len(image_url.split(',')))
+            if(len(image_url.split(','))==3 ):
+                final_img_url = image_url.split(',')[2].replace(
+                ' ', '').replace('1024w', '')
+            elif (len(image_url.split(','))==2 ):
+                final_img_url = image_url.split(',')[1].split(' ')[1]
+            else:
+                final_img_url = image_url.split(',')[0].replace(
+                ' ', '').replace('320w', '')
+            total_slides = soup.find(class_='total-slides j-total-slides').get_text().strip()
+            metadata = soup.find_all(class_='metadata-item')
+            category = soup.find(class_='CategoryChips_root__6o2nr').get_text().strip()
+            date = soup.find(class_='Text_root__Qdprv Text_secondary__SDKFB Text_medium__XbUIY').get_text().strip()
+            views= soup.find_all(class_='Text_root__Qdprv Text_secondary__SDKFB Text_weight-strong__Cygpu Text_medium__XbUIY Likes_root__8tyVB')[3].get_text().strip()
+            print(views)
+            if len(metadata) >= 2:
+                date, views = metadata[0].get_text(
+                ).strip(), metadata[2].get_text().strip()
 
-        return title, final_img_url, total_slides, category, date, views
+            return title, final_img_url, total_slides, category, date, views
+        except Exception as e:
+            logging.error(f"Failed to fetch slide information: {e}")
+            print(f"Failed to fetch slide information: {e}")
 
     def get_file_name(self):
         # get url basename and replace non-alpha with '_'
@@ -57,26 +66,30 @@ class SlideShareDownloader:
         return file_name
 
     def download_images(self):
-        html = requests.get(self.slideshare_url).content
-        soup = BeautifulSoup(html, 'lxml')
-        # soup.title.string
-        title = '/tmp'
-        images = soup.findAll('img', {'class': 'SlideImage_img__0DmDo'})
-        i = 0
-        for image in images:
-            image_url = image.get('srcset')
-            print(image_url)
-            length = len(image_url.split(','))
-            final_img_url = image_url.split(',')[length-1].split(' ')[1]
-            img = requests.get(final_img_url, verify=False)
-            if not os.path.exists(title):
-                os.makedirs(title)
-            with open(f"{title}/{i}", 'wb') as f:
-                f.write(img.content)
-            i += 1
-        print(self.download_format)
-        bfr, filename = self.convert(title)
-        return bfr, filename
+        try:
+            html = requests.get(self.slideshare_url).content
+            soup = BeautifulSoup(html, 'lxml')
+            # soup.title.string
+            title = '/tmp'
+            images = soup.findAll('img', {'class': 'SlideImage_img__0DmDo'})
+            i = 0
+            for image in images:
+                image_url = image.get('srcset')
+                print(image_url)
+                length = len(image_url.split(','))
+                final_img_url = image_url.split(',')[length-1].split(' ')[1]
+                img = requests.get(final_img_url, verify=False)
+                if not os.path.exists(title):
+                    os.makedirs(title)
+                with open(f"{title}/{i}", 'wb') as f:
+                    f.write(img.content)
+                i += 1
+            print(self.download_format)
+            bfr, filename = self.convert(title)
+            return bfr, filename
+        except Exception as e:
+            logging.error(f"Failed to download images: {e}")
+            print(f"Failed to download images: {e}")
 
     def convert(self, img_dir_name):
         try:
@@ -119,8 +132,10 @@ class SlideShareDownloader:
             f_bfr.seek(0)
             os.remove(filename)
             # shutil.rmtree(join(CURRENT, img_dir_name))
+            logging.info("Conversion successful.")
             return f_bfr, filename
 
         except Exception as e:
-            print(e)
+            logging.error(f"Conversion failed: {e}")
+            print(f"Conversion failed: {e}")
             return None, None
