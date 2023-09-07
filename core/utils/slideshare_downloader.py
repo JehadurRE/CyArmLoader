@@ -28,7 +28,10 @@ class SlideShareDownloader:
             html = requests.get(self.slideshare_url).content
             soup = BeautifulSoup(html, 'lxml')
             title = soup.find(class_='Heading_heading__LwpOS Heading_h1__J9yQZ Title_root__LXcGO').get_text().strip()
-            image_url = soup.find(class_='SlideImage_img__0DmDo')['srcset']
+            source_tag = soup.find('source', attrs={'data-testid': 'slide-image-source'})
+            srcset_value = source_tag['srcset']
+            print(srcset_value)
+            image_url = srcset_value
             print(len(image_url.split(',')))
             if(len(image_url.split(','))==3 ):
                 final_img_url = image_url.split(',')[2].replace(
@@ -71,7 +74,7 @@ class SlideShareDownloader:
             soup = BeautifulSoup(html, 'lxml')
             # soup.title.string
             title = '/tmp'
-            images = soup.findAll('img', {'class': 'SlideImage_img__0DmDo'})
+            images = soup.findAll('source', attrs={'data-testid': 'slide-image-source'})
             i = 0
             for image in images:
                 image_url = image.get('srcset')
