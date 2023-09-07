@@ -80,7 +80,7 @@ class SlideShareDownloader:
                 image_url = image.get('srcset')
                 print(image_url)
                 length = len(image_url.split(','))
-                final_img_url = image_url.split(',')[length-1].split(' ')[1]
+                final_img_url = image_url.split(',')[length-2].split(' ')[1]
                 img = requests.get(final_img_url, verify=False)
                 if not os.path.exists(title):
                     os.makedirs(title)
