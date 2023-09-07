@@ -145,7 +145,17 @@ class SlideShareDownloader:
 
             f_bfr.seek(0)
             os.remove(filename)
-            shutil.rmtree(join(CURRENT, img_dir_name))
+            # shutil.rmtree(join(CURRENT, img_dir_name))
+            directory_to_empty = join(CURRENT, img_dir_name)
+            if os.path.exists(directory_to_empty) and os.path.isdir(directory_to_empty):
+                # List all the files and subdirectories within the directory
+                for item in os.listdir(directory_to_empty):
+                    item_path = join(directory_to_empty, item)
+                    
+                    # Check if it's a file and delete it
+                    if os.path.isfile(item_path):
+                        os.remove(item_path)
+            
             logging.info("Conversion successful.")
             return f_bfr, filename
 
