@@ -11,6 +11,11 @@ from bs4 import BeautifulSoup
 import pptx
 import shutil
 from PIL import Image 
+from pytesseract import image_to_string
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib import colors
+from reportlab.lib.units import inch, cm
+from reportlab.pdfgen import canvas
 
 CURRENT = os.path.dirname(__file__)
 
@@ -112,14 +117,26 @@ class SlideShareDownloader:
 
             f_bfr = BytesIO()
             filename = self.get_file_name()
-            if self.download_format == 'pdf':
-                pdf_bytes = img2pdf.convert(imgs, dpi=300, x=None, y=None)
-                with open(filename, "wb") as doc:
-                    doc.write(pdf_bytes)
+            # if self.download_format == 'pdf':
+            #     pdf_bytes = img2pdf.convert(imgs, dpi=300, x=None, y=None)
+            #     with open(filename, "wb") as doc:
+            #         doc.write(pdf_bytes)
 
+            #     with open(filename, "rb") as fp:
+            #         f_bfr.write(fp.read())
+            #     f_bfr.write(pdf_bytes)
+             if self.download_format == 'pdf':
+                c = canvas.Canvas(filename, pagesize=letter)
+                for img_path in imgs:
+                    img = Image.open(img_path)
+                    text = image_to_string(img)
+                    c.drawString(100, 750, text)
+                    c.showPage()
+                c.save()
+                
                 with open(filename, "rb") as fp:
                     f_bfr.write(fp.read())
-                f_bfr.write(pdf_bytes)
+                
             else:
                 p = pptx.Presentation()
                 blank_slide_layout = p.slide_layouts[6]
