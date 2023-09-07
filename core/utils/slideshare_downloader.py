@@ -133,7 +133,6 @@ class SlideShareDownloader:
                         image = image.convert('RGB')
                         temp_image_path = f"temp_image.png"
                         image.save(temp_image_path, format='PNG')
-                        slide = p.slides.add_slide(blank_slide_layout)
                         slide.shapes.add_picture(
                         temp_image_path, 0, 0, p.slide_width, p.slide_height)
                         os.remove(temp_image_path)
