@@ -20,6 +20,7 @@ img2pdf = "*"
 beautifulsoup4 = "*"
 pypdf2 = "*"
 python-pptx = "*"
+pytesseract = "*"
 
 [dev-packages]
 autopep8 = "*"
