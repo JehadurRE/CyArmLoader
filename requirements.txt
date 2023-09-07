@@ -81,3 +81,4 @@ XlsxWriter==3.0.3
 yt-dlp==2021.10.22
 ytmusicapi==0.19.4
 zipp==3.8.1
+pillow

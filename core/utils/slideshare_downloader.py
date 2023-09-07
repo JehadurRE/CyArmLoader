@@ -9,8 +9,8 @@ from os.path import join
 import requests
 from bs4 import BeautifulSoup
 import pptx
-# import shutil
-
+import shutil
+from PIL import Image 
 
 CURRENT = os.path.dirname(__file__)
 
@@ -80,8 +80,8 @@ class SlideShareDownloader:
                 image_url = image.get('srcset')
                 print(image_url)
                 length = len(image_url.split(','))
-                final_img_url = image_url.split(',')[length-2].split(' ')[1]
-                img = requests.get(final_img_url, verify=False)
+                final_img_url = image_url.split(',')[length-1].split(' ')[1]
+                img = requests.get(final_img_url)
                 if not os.path.exists(title):
                     os.makedirs(title)
                 with open(f"{title}/{i}", 'wb') as f:
@@ -124,9 +124,20 @@ class SlideShareDownloader:
                 p = pptx.Presentation()
                 blank_slide_layout = p.slide_layouts[6]
                 for im in imgs:
-                    slide = p.slides.add_slide(blank_slide_layout)
-                    slide.shapes.add_picture(
-                        im, 0, 0, p.slide_width, p.slide_height)
+                    try:
+                        slide = p.slides.add_slide(blank_slide_layout)
+                        slide.shapes.add_picture(
+                            im, 0, 0, p.slide_width, p.slide_height)
+                    except Exception as e:
+                        image = Image.open(im)
+                        image = image.convert('RGB')
+                        temp_image_path = f"temp_image.png"
+                        image.save(temp_image_path, format='PNG')
+                        slide = p.slides.add_slide(blank_slide_layout)
+                        slide.shapes.add_picture(
+                        temp_image_path, 0, 0, p.slide_width, p.slide_height)
+                        os.remove(temp_image_path)
+                        logging.error(f"Conveted with exception image to pptx: 2048w")
 
                 p.save(filename)
                 with open(filename, "rb") as fp:
@@ -134,7 +145,7 @@ class SlideShareDownloader:
 
             f_bfr.seek(0)
             os.remove(filename)
-            # shutil.rmtree(join(CURRENT, img_dir_name))
+            shutil.rmtree(join(CURRENT, img_dir_name))
             logging.info("Conversion successful.")
             return f_bfr, filename
 
