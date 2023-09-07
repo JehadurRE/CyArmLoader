@@ -125,7 +125,7 @@ class SlideShareDownloader:
             #     with open(filename, "rb") as fp:
             #         f_bfr.write(fp.read())
             #     f_bfr.write(pdf_bytes)
-             if self.download_format == 'pdf':
+            if self.download_format == 'pdf':
                 c = canvas.Canvas(filename, pagesize=letter)
                 for img_path in imgs:
                     img = Image.open(img_path)
