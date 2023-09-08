@@ -47,3 +47,21 @@ def download_slides():
         print(f"Error: {e}")  # Debugging line
         flash('Something went wrong while downloading', 'error')
         return redirect(url_for('slide_downloader'))
+
+
+@app.post('/slideshare-downloader/slides/download')
+def download_slides():
+    try:
+        if file_data.get("slide_status") == "Done":
+            filename = file_data.get('slide_fname')
+            print(f"Debug: slide_fname = {filename}")  # Debugging line
+
+            return send_file(
+                file_data.get('slide_bfr'),
+                as_attachment=True,
+                download_name=filename  # Use 'download_name' instead of 'attachment_filename'
+            )
+    except Exception as e:
+        print(f"Error: {e}")  # Debugging line
+        flash('Something went wrong while downloading', 'error')
+        return redirect(url_for('slide_downloader'))
