@@ -114,6 +114,8 @@ class SlideShareDownloader:
 
             f_bfr = BytesIO()
             filename = self.get_file_name()
+            logging.error(f"File Name :"+ filename)
+
             # if self.download_format == 'pdf':
             #     pdf_bytes = img2pdf.convert(imgs, dpi=300, x=None, y=None)
             #     with open(filename, "wb") as doc:
@@ -130,14 +132,13 @@ class SlideShareDownloader:
                     doc.write(pdf_bytes)
 
                 # OCR the PDF to make it searchable
-                ocr_pdf_path = "temp_ocr.pdf"
+                ocr_pdf_path = filename
                 ocrmypdf.ocr(temp_pdf_path, ocr_pdf_path, language='eng')
 
                 with open(ocr_pdf_path, "rb") as fp:
                     f_bfr.write(fp.read())
 
-                os.remove(temp_pdf_path)
-                os.remove(ocr_pdf_path)                
+                os.remove(temp_pdf_path)                
             else:
                 p = pptx.Presentation()
                 blank_slide_layout = p.slide_layouts[6]
