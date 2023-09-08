@@ -11,11 +11,7 @@ from bs4 import BeautifulSoup
 import pptx
 import shutil
 from PIL import Image 
-from pytesseract import image_to_string
-from reportlab.lib.pagesizes import letter, landscape
-from reportlab.lib import colors
-from reportlab.lib.units import inch, cm
-from reportlab.pdfgen import canvas
+import ocrmypdf
 
 CURRENT = os.path.dirname(__file__)
 
@@ -125,18 +121,22 @@ class SlideShareDownloader:
             #     with open(filename, "rb") as fp:
             #         f_bfr.write(fp.read())
             #     f_bfr.write(pdf_bytes)
+            
             if self.download_format == 'pdf':
-                c = canvas.Canvas(filename, pagesize=letter)
-                for img_path in imgs:
-                    img = Image.open(img_path)
-                    text = image_to_string(img)
-                    c.drawString(100, 750, text)
-                    c.showPage()
-                c.save()
-                
-                with open(filename, "rb") as fp:
+                pdf_bytes = img2pdf.convert(imgs, dpi=300, x=None, y=None)
+                temp_pdf_path = "temp_non_ocr.pdf"
+                with open(temp_pdf_path, "wb") as doc:
+                    doc.write(pdf_bytes)
+
+                # OCR the PDF to make it searchable
+                ocr_pdf_path = "temp_ocr.pdf"
+                ocrmypdf.ocr(temp_pdf_path, ocr_pdf_path, language='eng')
+
+                with open(ocr_pdf_path, "rb") as fp:
                     f_bfr.write(fp.read())
-                
+
+                os.remove(temp_pdf_path)
+                os.remove(ocr_pdf_path)                
             else:
                 p = pptx.Presentation()
                 blank_slide_layout = p.slide_layouts[6]
