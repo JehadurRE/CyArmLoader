@@ -1,4 +1,9 @@
 tesseract-ocr
 tesseract-ocr-eng
 libarchive13
-ocrmypdf
+ghostscript 
+icc-profiles-free
+libxml2 
+pngquant
+tesseract-ocr
+zlib1g
