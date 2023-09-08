@@ -12,6 +12,7 @@ import pptx
 import shutil
 from PIL import Image 
 import ocrmypdf
+import traceback
 
 CURRENT = os.path.dirname(__file__)
 
@@ -178,4 +179,5 @@ class SlideShareDownloader:
         except Exception as e:
             logging.error(f"Conversion failed: {e}")
             print(f"Conversion failed: {e}")
+            traceback.print_exc()
             return None, None
